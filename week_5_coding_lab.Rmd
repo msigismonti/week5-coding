@@ -48,5 +48,56 @@ chinstraps %>%
   )
 ```
 
+Get vectors of body_mass_g for female and male chinstrap penguins separately.
+
+```{r}
+chinstraps_f <- chinstraps %>% 
+  filter(sex == "female") %>% 
+  pull(body_mass_g)
+
+chinstraps_m <- chinstraps %>% 
+  filter(sex == "male") %>% 
+  pull(body_mass_g)
+```
 
 
+### T-tests, a couple diffferent ways
+
+1. is there a significant difference in body mass between male and female chinstrap penguins?
+
+```{r}
+chinstraps_ttest <- t.test(chinstraps_f, chinstraps_m)
+chinstraps_ttest
+
+cohen.d(chinstraps_f, chinstraps_m)
+```
+
+null: means are equal for male and femal chinstrap penguins
+p value says: super low chance that we ciuld have taken these two samples and gotten measn that are at least as different as ours are if they're drawn from populations with the same mean sufficient evidence to reject the null hypothesis.  at least as different as ours are by random chance if they were drawn from pops with the same mean
+
+large effect size: pretty clear difference between the groups
+
+There is a significant difference in body mass, and a large effect size (Cohen's *d* = -1.26). The way I'm *writing this* is not reproducible. How can we use in-line referencing of outcomes so that the values would automatically update if the values did? 
+
+Use `broom::tidy()` to get messy model outputs into tidy data frames that are easy to reference! 
+
+```{r}
+chinstraps_out <- broom::tidy(chinstraps_ttest)
+chinstraps_out
+```
+
+
+2. Are male chinstrap penguins significantly larger than female chinstrap penguins? 
+
+This is a *one-sided* test - we are only interested in the upper tail. We will still use the `t.test()` function, but update the default `alternative = ` argument from "two-sided" to "greater" or "less."
+
+```{r}
+# "Is mean male mass significantly GREATER than female mass?"
+t.test(chinstraps_m, chinstraps_f, alternative = "greater")
+
+# Yields the same statistical outcomes as "Is mean female mass significantly LESS than male mass?" 
+t.test(chinstraps_f, chinstraps_m, alternative = "less")
+```
+reject the null hypothesis and retain the alt hyp
+
+male chinstrap penguins body mass is significantly greater than female chinstrap penguins body mass
